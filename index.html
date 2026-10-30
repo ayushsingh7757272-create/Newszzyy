@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>न्यूजी | Latest News</title>
+<style>
+:root{
+  --bg:#0b1020;--panel:#141c30;--panel2:#1b2740;
+  --text:#f4f6ff;--muted:#9ba8c2;--purple:#8267ff;
+  --pink:#e75bba;--line:#26334d;--gold:#ffc65c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit}
+header{background:#10182b;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.header{max-width:1250px;margin:auto;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{font-size:32px;font-weight:900;letter-spacing:-1px}
+.logo span{color:var(--purple)}
+.logo small{display:block;font-size:10px;color:var(--muted);letter-spacing:3px;margin-top:3px}
+.search{display:flex;gap:7px;max-width:360px;width:100%}
+.search input{width:100%;min-width:0;background:var(--panel);border:1px solid var(--line);padding:12px 14px;border-radius:8px;color:white;outline:none}
+.search button,.refresh{border:0;background:var(--purple);color:white;padding:11px 16px;border-radius:8px;cursor:pointer;font-weight:bold}
+nav{background:#141c30;border-bottom:1px solid var(--line);overflow-x:auto}
+.nav{max-width:1250px;margin:auto;display:flex;padding:0 15px;white-space:nowrap}
+.nav button{background:none;border:0;color:var(--muted);padding:16px 15px;cursor:pointer;border-bottom:3px solid transparent}
+.nav button.active,.nav button:hover{color:white;border-color:var(--purple)}
+.container{max-width:1250px;margin:25px auto;padding:0 20px}
+.breaking{background:#211b38;border:1px solid #45356d;padding:13px 16px;border-radius:9px;font-size:13px;color:#ddd5ff;margin-bottom:24px}
+.breaking b{color:var(--gold);margin-right:10px}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:28px 0 16px}
+.section-title h2{font-size:21px;margin:0}
+.section-title h2:before{content:"";display:inline-block;width:5px;height:22px;background:var(--purple);margin-right:10px;vertical-align:-4px;border-radius:5px}
+.muted{color:var(--muted);font-size:12px}
+.hero{display:grid;grid-template-columns:1.5fr 1fr;gap:17px}
+.hero-main{min-height:270px;padding:27px;border-radius:13px;background:linear-gradient(135deg,#34246e,#7048bc,#263d73);display:flex;flex-direction:column;justify-content:end}
+.hero-main h1{font-size:clamp(24px,4vw,39px);line-height:1.15;margin:13px 0}
+.hero-main p{color:#e3ddff;line-height:1.6;margin:0}
+.hero-side{display:grid;gap:15px}
+.hero-small{border-radius:12px;padding:20px;background:linear-gradient(130deg,#164e65,#237f88);display:flex;flex-direction:column;justify-content:end;min-height:125px}
+.hero-small:nth-child(2){background:linear-gradient(130deg,#622e70,#a34e83)}
+.tag{display:inline-block;width:max-content;background:var(--gold);color:#241b0a;padding:5px 9px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase}
+.hero-small h3{font-size:17px;margin:10px 0 0;line-height:1.4}
+.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:.2s}
+.card:hover{transform:translateY(-3px);border-color:#6755b5}
+.card-top{height:105px;background:linear-gradient(135deg,#25234c,#283e62);display:flex;align-items:center;justify-content:center;font-size:36px}
+.card-content{padding:16px;display:flex;flex-direction:column;flex:1}
+.meta{font-size:11px;color:var(--muted);display:flex;gap:9px;flex-wrap:wrap}
+.category{color:#b5a5ff;font-weight:bold;text-transform:uppercase}
+.card h3{font-size:16px;line-height:1.4;margin:12px 0}
+.card p{font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 17px}
+.read{margin-top:auto;color:#b7a8ff;font-size:13px;font-weight:bold}
+.read:hover{color:white}
+.status{padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:10px;text-align:center;color:var(--muted);line-height:1.6}
+.status button{margin-top:10px}
+.detail{max-width:850px;margin:25px auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:clamp(20px,5vw,45px)}
+.back{color:#b7a8ff;font-weight:bold;font-size:13px}
+.detail h1{font-size:clamp(26px,5vw,42px);line-height:1.2;margin:20px 0}
+.detail-summary{font-size:17px;line-height:1.8;color:#c1cbe0;margin-top:20px}
+.source-button{display:inline-block;background:var(--purple);color:white;padding:14px 20px;border-radius:8px;margin-top:20px;font-weight:bold}
+.source-button:hover{background:#6b51ed}
+.detail-note{margin-top:25px;padding:15px;background:var(--panel2);border-radius:8px;color:var(--muted);font-size:12px;line-height:1.7}
+footer{margin-top:60px;background:#10182b;border-top:1px solid var(--line);padding:35px 20px;text-align:center}
+footer .footlogo{font-size:27px;font-weight:900}
+footer p{color:var(--muted);font-size:13px;line-height:1.7}
+footer .credit{border-top:1px solid var(--line);padding-top:17px;margin-top:22px;font-size:12px}
+.hidden{display:none!important}
+@media(max-width:750px){
+ .header{flex-wrap:wrap}.search{max-width:none;order:3}
+ .hero{grid-template-columns:1fr}.hero-main{min-height:230px}
+ .hero-side{grid-template-columns:1fr 1fr}
+ .news-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){
+ .container{padding:0 13px}
+ .news-grid{grid-template-columns:1fr}
+ .hero-side{grid-template-columns:1fr 1fr}
+ .nav button{padding:14px 12px;font-size:12px}
+}
+</style>
+</head>
+
+<body>
+<header>
+ <div class="header">
+  <a href="#" class="logo">न्यूजी<span>.</span>
+   <small>YOUR DAILY NEWS DESTINATION</small>
+  </a>
+  <form class="search" id="searchForm">
+   <input id="searchInput" placeholder="Search news..." type="search">
+   <button type="submit">Search</button>
+  </form>
+ </div>
+</header>
+
+<nav>
+ <div class="nav" id="navigation">
+  <button class="active" data-category="All">Home</button>
+  <button data-category="Politics">Politics</button>
+  <button data-category="Sports">Sports</button>
+  <button data-category="Finance">Finance</button>
+  <button data-category="Business">Business</button>
+  <button data-category="Technology">Technology</button>
+  <button data-category="World">World</button>
+  <button data-category="Entertainment">Entertainment</button>
+  <button data-category="Education">Education</button>
+ </div>
+</nav>
+
+<main class="container" id="homePage">
+ <div class="breaking">
+  <b>● LIVE NEWS</b>
+  <span id="breakingText">Loading the latest headlines for you...</span>
+ </div>
+
+ <section>
+  <div class="section-title">
+   <h2>Top Stories</h2>
+   <span class="muted">Today's highlights</span>
+  </div>
+  <div class="hero" id="featured">
+   <div class="status">Loading top stories...</div>
+  </div>
+ </section>
+
+ <section>
+  <div class="section-title">
+   <h2 id="sectionHeading">Latest News</h2>
+   <div>
+    <span class="muted" id="newsCount">Loading...</span>
+    <button class="refresh" id="refreshButton">↻ Refresh</button>
+   </div>
+  </div>
+  <div class="news-grid" id="newsGrid"></div>
+  <div class="status hidden" id="message"></div>
+ </section>
+</main>
+
+<main class="container hidden" id="storyPage">
+ <article class="detail" id="storyContent"></article>
+</main>
+
+<footer>
+ <div class="footlogo">न्यूजी<span style="color:var(--purple)">.</span></div>
+ <p>Politics • Sports • Finance • Business • Technology • World News</p>
+ <p>News headlines are collected from Google News RSS feeds.<br>
+  Full reports belong to their respective publishers.</p>
+ <div class="credit">© <span id="year"></span> न्यूजी. All rights reserved.<br>
+  Created by <b>Priyanshu Sharma</b>
+ </div>
+</footer>
+
+<script>
+const CATEGORIES = {
+ Politics: {icon:"🏛️", query:"India politics"},
+ Sports: {icon:"🏆", query:"India sports cricket"},
+ Finance: {icon:"📈", query:"India stock market finance economy"},
+ Business: {icon:"💼", query:"India business companies"},
+ Technology: {icon:"💻", query:"technology India"},
+ World: {icon:"🌍", query:"world news"},
+ Entertainment: {icon:"🎬", query:"India entertainment"},
+ Education: {icon:"🎓", query:"India education universities"}
+};
+
+let allNews = [];
+let activeCategory = "All";
+let searchTerm = "";
+let loading = false;
+
+const $ = id => document.getElementById(id);
+
+function escapeHTML(value=""){
+ return String(value).replace(/[&<>"']/g, ch => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[ch]));
+}
+
+function cleanText(html=""){
+ const doc = new DOMParser().parseFromString(html,"text/html");
+ return (doc.body.textContent || "").replace(/\s+/g," ").trim();
+}
+
+function formatDate(value){
+ if(!value) return "Latest";
+ const date = new Date(value);
+ if(isNaN(date)) return "Latest";
+ return date.toLocaleString("en-IN",{
+  day:"numeric",month:"short",year:"numeric",
+  hour:"2-digit",minute:"2-digit"
+ });
+}
+
+function googleFeed(query){
+ return "https://news.google.com/rss/search?q=" +
+  encodeURIComponent(query + " when:7d") +
+  "&hl=en-IN&gl=IN&ceid=IN:en";
+}
+
+async function fetchCategory(category){
+ const feedURL = googleFeed(CATEGORIES[category].query);
+ const proxyURL = "https://api.allorigins.win/raw?url=" +
+  encodeURIComponent(feedURL);
+
+ const response = await fetch(proxyURL);
+ if(!response.ok) throw new Error("Feed unavailable");
+
+ const xmlText = await response.text();
+ const xml = new DOMParser().parseFromString(xmlText,"text/xml");
+
+ if(xml.querySelector("parsererror")) throw new Error("Invalid RSS feed");
+
+ return [...xml.querySelectorAll("item")].map((item,index)=>{
+  const title = item.querySelector("title")?.textContent?.trim() || "";
+  const link = item.querySelector("link")?.textContent?.trim() || "";
+  const description = cleanText(
+   item.querySelector("description")?.textContent || ""
+  );
+  const source = item.querySelector("source")?.textContent?.trim() || "Google News";
+  const date = item.querySelector("pubDate")?.textContent || "";
+
+  return {
+   id: category + "-" + index + "-" + title.slice(0,25),
+   title,link,description,source,date,category
+  };
+ }).filter(item=>item.title && item.link);
+}
+
+async function loadNews(){
+ if(loading) return;
+ loading = true;
+ $("refreshButton").textContent = "Loading...";
+ $("message").classList.add("hidden");
+ $("newsGrid").innerHTML = '<div class="status">Fetching latest headlines...</div>';
+
+ const results = await Promise.allSettled(
+  Object.keys(CATEGORIES).map(fetchCategory)
+ );
+
+ allNews = [];
+ results.forEach((result,index)=>{
+  if(result.status==="fulfilled"){
+   allNews.push(...result.value);
+  }else{
+   console.warn("Could not load",Object.keys(CATEGORIES)[index],result.reason);
+  }
+ });
+
+ allNews.sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+ if(allNews.length===0){
+  $("featured").innerHTML='<div class="status">News could not load right now. Please check your internet connection or try again.</div>';
+  $("newsGrid").innerHTML="";
+  $("message").classList.remove("hidden");
+  $("message").innerHTML='News feed is temporarily unavailable. <br>Use Refresh to try again.';
+  $("newsCount").textContent="0 stories";
+ }else{
+  $("breakingText").textContent=allNews[0].title;
+  renderNews();
+ }
+
+ loading = false;
+ $("refreshButton").textContent = "↻ Refresh";
+}
+
+function makeCard(article){
+ const icon = CATEGORIES[article.category]?.icon || "📰";
+ return `
+ <article class="card">
+  <div class="card-top">${icon}</div>
+  <div class="card-content">
+   <div class="meta">
+    <span class="category">${escapeHTML(article.category)}</span>
+    <span>•</span>
+    <span>${escapeHTML(formatDate(article.date))}</span>
+   </div>
+   <h3>${escapeHTML(article.title)}</h3>
+   <p>${escapeHTML(article.description.slice(0,180) || "Open this story to read the original news report.")}</p>
+   <a class="read" href="#story=${encodeURIComponent(article.id)}">Read Full News →</a>
+  </div>
+ </article>`;
+}
+
+function renderFeatured(){
+ const list = allNews.slice(0,3);
+ if(!list.length) return;
+
+ const first = list[0];
+ const rest = list.slice(1);
+
+ $("featured").innerHTML = `
+  <a class="hero-main" href="#story=${encodeURIComponent(first.id)}">
+   <span class="tag">${escapeHTML(first.category)}</span>
+   <h1>${escapeHTML(first.title)}</h1>
+   <p>${escapeHTML(first.description.slice(0,180))}</p>
+   <p style="margin-top:14px;font-weight:bold">Read Story →</p>
+  </a>
+  <div class="hero-side">
+   ${rest.map(a=>`
+    <a class="hero-small" href="#story=${encodeURIComponent(a.id)}">
+     <span class="tag">${escapeHTML(a.category)}</span>
+     <h3>${escapeHTML(a.title)}</h3>
+    </a>`).join("")}
+   ${rest.length===0?'<div class="hero-small"><h3>More top stories are loading.</h3></div>':""}
+  </div>`;
+}
+
+function renderNews(){
+ renderFeatured();
+
+ const filtered = allNews.filter(article=>{
+  const categoryMatch = activeCategory==="All" || article.category===activeCategory;
+  const searchable = (article.title+" "+article.description+" "+article.source+" "+article.category).toLowerCase();
+  return categoryMatch && searchable.includes(searchTerm);
+ });
+
+ $("sectionHeading").textContent =
+  activeCategory==="All" ? "Latest News" : activeCategory+" News";
+ $("newsCount").textContent=filtered.length+" stories";
+
+ $("newsGrid").innerHTML=filtered.map(makeCard).join("");
+
+ if(filtered.length===0){
+  $("newsGrid").innerHTML='<div class="status">No stories found in this section.</div>';
+ }
+ $("message").classList.add("hidden");
+}
+
+function showStory(id){
+ const article=allNews.find(item=>item.id===id);
+ $("homePage").classList.add("hidden");
+ $("storyPage").classList.remove("hidden");
+
+ if(!article){
+  $("storyContent").innerHTML=`
+   <a href="#" class="back">← Back to न्यूजी</a>
+   <h1>Story not found</h1>
+   <p>This story is not available right now. Return to the homepage and select another story.</p>`;
+  return;
+ }
+
+ const linkIsValid=/^https?:\/\//i.test(article.link);
+
+ $("storyContent").innerHTML=`
+  <a href="#" class="back">← Back to न्यूजी</a>
+  <div class="meta" style="margin-top:25px">
+   <span class="category">${escapeHTML(article.category)}</span>
+   <span>•</span>
+   <span>${escapeHTML(formatDate(article.date))}</span>
+  </div>
+  <h1>${escapeHTML(article.title)}</h1>
+  <div class="muted">Source: ${escapeHTML(article.source)}</div>
+  <p class="detail-summary">${escapeHTML(article.description || "Read the original report for more details.")}</p>
+  ${linkIsValid
+   ? `<a class="source-button" href="${escapeHTML(article.link)}" target="_blank" rel="noopener noreferrer">Read Full News ↗</a>`
+   : ""}
+  <div class="detail-note">
+   This story is displayed on न्यूजी using a news headline feed.
+   The original article is published by the source shown above.
+   Click "Read Full News" to visit the publisher's report.
+  </div>`;
+}
+
+function showHome(){
+ $("storyPage").classList.add("hidden");
+ $("homePage").classList.remove("hidden");
+}
+
+function handleRoute(){
+ const hash=decodeURIComponent(location.hash);
+ const match=hash.match(/^#story=(.+)$/);
+ if(match){
+  showStory(match[1]);
+ }else{
+  showHome();
+ }
+}
+
+$("navigation").addEventListener("click",event=>{
+ const button=event.target.closest("button[data-category]");
+ if(!button) return;
+
+ activeCategory=button.dataset.category;
+ document.querySelectorAll("#navigation button").forEach(b=>{
+  b.classList.toggle("active",b===button);
+ });
+ renderNews();
+});
+
+$("searchForm").addEventListener("submit",event=>{
+ event.preventDefault();
+ searchTerm=$("searchInput").value.trim().toLowerCase();
+ renderNews();
+});
+
+$("refreshButton").addEventListener("click",loadNews);
+
+window.addEventListener("hashchange",handleRoute);
+
+$("year").textContent=new Date().getFullYear();
+
+loadNews();
+handleRoute();
+</script>
+</body>
+</html>
