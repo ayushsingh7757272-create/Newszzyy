@@ -200,58 +200,74 @@ function googleFeed(query){
 }
 
 
+
 async function fetchCategory(category) {
   const feedURL = googleFeed(CATEGORIES[category].query);
 
-  // New RSS proxy
   const proxyURL = "https://proxy.cors.dev/" + feedURL;
 
   const response = await fetch(proxyURL, {
-    signal: AbortSignal.timeout(15000)
+    credentials: "omit",
+    signal: AbortSignal.timeout(25000)
   });
 
   if (!response.ok) {
-    throw new Error("News feed unavailable: " + response.status);
+    const errorCode = response.headers.get("X-Cors-Error");
+    throw new Error(
+      "News feed unavailable: " + (errorCode || response.status)
+    );
   }
 
   const xmlText = await response.text();
 
   const xml = new DOMParser().parseFromString(
     xmlText,
-    "text/xml"
+    "application/xml"
   );
 
   if (xml.querySelector("parsererror")) {
     throw new Error("Invalid RSS feed");
   }
 
-  return [...xml.querySelectorAll("item")].map((item, index) => {
-    const title =
-      item.querySelector("title")?.textContent?.trim() || "";
+  return [...xml.querySelectorAll("item, entry")]
+    .map((item, index) => {
+      const title =
+        item.querySelector("title")?.textContent?.trim() || "";
 
-    const link =
-      item.querySelector("link")?.textContent?.trim() || "";
+      const linkElement =
+        item.querySelector('link[rel="alternate"]') ||
+        item.querySelector("link");
 
-    const description = cleanText(
-      item.querySelector("description")?.textContent || ""
-    );
+      const link =
+        linkElement?.getAttribute("href") ||
+        linkElement?.textContent?.trim() || "";
 
-    const source =
-      item.querySelector("source")?.textContent?.trim() || "Google News";
+      const description = cleanText(
+        item.querySelector("description")?.textContent ||
+        item.querySelector("summary")?.textContent ||
+        ""
+      );
 
-    const date =
-      item.querySelector("pubDate")?.textContent || "";
+      const source =
+        item.querySelector("source")?.textContent?.trim() ||
+        "Google News";
 
-    return {
-      id: category + "-" + index + "-" + title.slice(0, 25),
-      title,
-      link,
-      description,
-      source,
-      date,
-      category
-    };
-  }).filter(item => item.title && item.link);
+      const date =
+        item.querySelector("pubDate")?.textContent ||
+        item.querySelector("published")?.textContent ||
+        item.querySelector("updated")?.textContent || "";
+
+      return {
+        id: category + "-" + index + "-" + title.slice(0, 25),
+        title,
+        link,
+        description,
+        source,
+        date,
+        category
+      };
+    })
+    .filter(item => item.title && item.link);
 }
 
 
