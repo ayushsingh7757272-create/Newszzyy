@@ -199,34 +199,61 @@ function googleFeed(query){
   "&hl=en-IN&gl=IN&ceid=IN:en";
 }
 
-async function fetchCategory(category){
- const feedURL = googleFeed(CATEGORIES[category].query);
- const proxyURL = "https://api.allorigins.win/raw?url=" +
-  encodeURIComponent(feedURL);
 
- const response = await fetch(proxyURL);
- if(!response.ok) throw new Error("Feed unavailable");
+async function fetchCategory(category) {
+  const feedURL = googleFeed(CATEGORIES[category].query);
 
- const xmlText = await response.text();
- const xml = new DOMParser().parseFromString(xmlText,"text/xml");
+  // New RSS proxy
+  const proxyURL = "https://proxy.cors.dev/" + feedURL;
 
- if(xml.querySelector("parsererror")) throw new Error("Invalid RSS feed");
+  const response = await fetch(proxyURL, {
+    signal: AbortSignal.timeout(15000)
+  });
 
- return [...xml.querySelectorAll("item")].map((item,index)=>{
-  const title = item.querySelector("title")?.textContent?.trim() || "";
-  const link = item.querySelector("link")?.textContent?.trim() || "";
-  const description = cleanText(
-   item.querySelector("description")?.textContent || ""
+  if (!response.ok) {
+    throw new Error("News feed unavailable: " + response.status);
+  }
+
+  const xmlText = await response.text();
+
+  const xml = new DOMParser().parseFromString(
+    xmlText,
+    "text/xml"
   );
-  const source = item.querySelector("source")?.textContent?.trim() || "Google News";
-  const date = item.querySelector("pubDate")?.textContent || "";
 
-  return {
-   id: category + "-" + index + "-" + title.slice(0,25),
-   title,link,description,source,date,category
-  };
- }).filter(item=>item.title && item.link);
+  if (xml.querySelector("parsererror")) {
+    throw new Error("Invalid RSS feed");
+  }
+
+  return [...xml.querySelectorAll("item")].map((item, index) => {
+    const title =
+      item.querySelector("title")?.textContent?.trim() || "";
+
+    const link =
+      item.querySelector("link")?.textContent?.trim() || "";
+
+    const description = cleanText(
+      item.querySelector("description")?.textContent || ""
+    );
+
+    const source =
+      item.querySelector("source")?.textContent?.trim() || "Google News";
+
+    const date =
+      item.querySelector("pubDate")?.textContent || "";
+
+    return {
+      id: category + "-" + index + "-" + title.slice(0, 25),
+      title,
+      link,
+      description,
+      source,
+      date,
+      category
+    };
+  }).filter(item => item.title && item.link);
 }
+
 
 async function loadNews(){
  if(loading) return;
